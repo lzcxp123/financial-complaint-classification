@@ -32,7 +32,7 @@ def demo_predict(text, model, tokenizer, class_list):
     print(f"分词结果: {tokens[:20]}...")
 
     # 第二步：转为token IDs
-    encoded = tokenizer.encode_plus(
+    encoded = tokenizer(
         text,
         add_special_tokens=True,
         max_length=256,

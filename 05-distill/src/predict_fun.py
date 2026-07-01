@@ -42,11 +42,10 @@ def _load_model():
 
 
 def _tokenize_en(text):
-    """英文分词（正则分词，不依赖nltk）"""
+    """英文分词（正则分词，与03-bilstm保持一致）"""
     text = text.lower()
-    text = re.sub(r"[^a-zA-Z0-9\s]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text.split()
+    tokens = re.findall(r"[a-zA-Z0-9]+|[.,!?;:'\"()\-]", text)
+    return tokens
 
 
 def _text_to_ids(text, vocab, pad_size):

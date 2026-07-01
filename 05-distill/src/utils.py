@@ -1,25 +1,15 @@
+import re
 import pickle
-import nltk
 import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizer
 from config import conf
 
-# nltk数据检查
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-try:
-    nltk.data.find('tokenizers/punkt_tab')
-except LookupError:
-    nltk.download('punkt_tab')
-
 
 def tokenize_en(text):
-    """英文分词：使用nltk.word_tokenize"""
+    """英文分词：使用正则分词，与03-bilstm保持一致"""
     text = text.lower()
-    tokens = nltk.word_tokenize(text)
+    tokens = re.findall(r"[a-zA-Z0-9]+|[.,!?;:'\"()\-]", text)
     return tokens
 
 

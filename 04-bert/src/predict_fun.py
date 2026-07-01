@@ -1,61 +1,48 @@
 import torch
 import torch.nn as nn
-from transformers import BertTokenizer, BertModel, BertConfig
+from transformers import BertTokenizer
 from config import conf
+from bert_classifer_model import BertClassifier
 
 
-_model = None
+_model_full = None
+_model_quantized = None
 _tokenizer = None
 
 
 def load_model(quantized=False):
-    """加载模型和分词器（单例模式）"""
-    global _model, _tokenizer
+    """加载模型和分词器（单例模式，分别缓存普通模型和量化模型）"""
+    global _model_full, _model_quantized, _tokenizer
 
-    if _model is None:
-        # 加载分词器
+    if _tokenizer is None:
         _tokenizer = BertTokenizer.from_pretrained(conf.bert_path)
 
-        # 加载模型
-        if quantized:
-            model_path = conf.quantized_model_path
-            device = torch.device("cpu")  # 量化模型只能在CPU上运行
-        else:
-            model_path = conf.model_save_path
-            device = conf.device
-
-        if not torch.cuda.is_available():
+    if quantized:
+        if _model_quantized is None:
             device = torch.device("cpu")
-
-        # 加载模型结构
-        _model = BertClassifier()
-        _model.load_state_dict(torch.load(model_path, map_location=device))
-        _model.to(device)
-        _model.eval()
-        print(f"模型已加载: {model_path}")
-
-    return _model, _tokenizer
-
-
-class BertClassifier(nn.Module):
-    """BERT文本分类模型（用于预测）"""
-
-    def __init__(self):
-        super(BertClassifier, self).__init__()
-        self.bert = BertModel.from_pretrained(conf.bert_path)
-        self.dropout = nn.Dropout(0.1)
-        self.fc = nn.Linear(conf.hidden_size, conf.num_classes)
-
-    def forward(self, input_ids, attention_mask):
-        outputs = self.bert(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            return_dict=False
-        )
-        pooled = outputs[1]
-        pooled = self.dropout(pooled)
-        out = self.fc(pooled)
-        return out
+            _model_quantized = torch.quantization.quantize_dynamic(
+                BertClassifier(),
+                {nn.Linear},
+                dtype=torch.qint8
+            )
+            state_dict = torch.load(conf.quantized_model_path, map_location=device)
+            _model_quantized.load_state_dict(state_dict)
+            _model_quantized.to(device)
+            _model_quantized.eval()
+            print(f"量化模型已加载: {conf.quantized_model_path}")
+        return _model_quantized, _tokenizer
+    else:
+        if _model_full is None:
+            device = conf.device
+            if not torch.cuda.is_available():
+                device = torch.device("cpu")
+            _model_full = BertClassifier()
+            state_dict = torch.load(conf.model_save_path, map_location=device)
+            _model_full.load_state_dict(state_dict)
+            _model_full.to(device)
+            _model_full.eval()
+            print(f"模型已加载: {conf.model_save_path}")
+        return _model_full, _tokenizer
 
 
 def predict(text, quantized=False):
@@ -69,7 +56,7 @@ def predict(text, quantized=False):
     model, tokenizer = load_model(quantized=quantized)
 
     # 第一步：文本编码
-    encoded = tokenizer.encode_plus(
+    encoded = tokenizer(
         text,
         add_special_tokens=True,
         max_length=conf.max_seq_length,
@@ -126,7 +113,7 @@ def predict_batch(texts, quantized=False):
     model, tokenizer = load_model(quantized=quantized)
 
     # 批量编码
-    encoded = tokenizer.batch_encode_plus(
+    encoded = tokenizer(
         texts,
         add_special_tokens=True,
         max_length=conf.max_seq_length,

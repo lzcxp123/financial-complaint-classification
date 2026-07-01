@@ -58,6 +58,13 @@ class Config(object):
         self.alpha = 0.3       # 硬标签损失权重 (0.3*CE + 0.7*KL)
         self.temperature = 4   # 蒸馏温度
 
+        # 兼容predict_fun.py的pad_size属性
+        self.pad_size = self.student_pad_size
+
+        # 兼容api.py和app.py的路径属性
+        self.teacher_path = self.teacher_bert_path
+        self.student_path = "BiLSTM+Attention"
+
         # API端口
         self.api_port = 8005
 
