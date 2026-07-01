@@ -1,0 +1,18 @@
+Test Loss: 0.4585
+Test Acc: 0.8581
+Test Macro-F1: 0.8583
+
+                          precision    recall  f1-score   support
+
+        Credit reporting       0.82      0.86      0.84      2500
+           Payment cards       0.77      0.81      0.79      2500
+                Mortgage       0.95      0.95      0.95      2500
+         Debt collection       0.83      0.78      0.80      2500
+        Banking services       0.77      0.81      0.79      2500
+          Consumer loans       0.87      0.83      0.85      2500
+         Money transfers       0.87      0.83      0.85      2500
+Other financial services       1.00      1.00      1.00      2500
+
+                accuracy                           0.86     20000
+               macro avg       0.86      0.86      0.86     20000
+            weighted avg       0.86      0.86      0.86     20000

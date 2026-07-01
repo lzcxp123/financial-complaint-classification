@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+
+# 数据文件（太大，不传GitHub）
+complaints.csv
+01-data/train.txt
+01-data/dev.txt
+01-data/test.txt
+
+# 模型文件（太大，不传GitHub）
+*.pt
+*.pkl
+*.bin
+*.h5
+*.msgpack
+*.ckpt
+*.safetensors
+
+# 词表
+02-textcnn/data/vocab.pkl
+03-bilstm/data/vocab.pkl
+
+# 预训练模型
+04-bert/ProsusAI/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# 日志
+*.log
+logs/
+
+# 输出图表（可选保留，这里排除）
+outputs/*.png
+outputs/*.csv
+outputs/*.md
+
+# Streamlit
+.streamlit/
+
+# 临时文件
+*.tmp
+*.bak
